@@ -317,6 +317,34 @@ function Chat(props) {
     } catch (err) {}
   };
 
+  const handleLeaveChat = async (chat) => {
+    try {
+      // Build users payload excluding current user
+      const usersPayload = (chat.users || [])
+        .filter((u) => u.userId !== user.id)
+        .map((u) => ({ id: u.user.id, name: u.user.name }));
+
+      // If after removal there are no users left, just delete the chat
+      if (usersPayload.length === 0) {
+        await api.delete(`/chats/${chat.id}`);
+      } else {
+        await api.put(`/chats/${chat.id}`, { users: usersPayload, title: chat.title });
+      }
+
+      // Update local state: remove from chats and if currentChat, navigate away
+      const filtered = chats.filter((c) => c.id !== chat.id);
+      setChats(filtered);
+      if (currentChat && currentChat.id === chat.id) {
+        setCurrentChat({});
+        setMessages([]);
+        setMessagesPage(1);
+        history.push('/chats');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const findMessages = async (chatId) => {
     setLoading(true);
     try {
@@ -375,6 +403,7 @@ function Chat(props) {
               setDialogType("edit");
               setShowDialog(true);
             }}
+            handleLeaveChat={handleLeaveChat}
           />
         </Grid>
         <Grid className={classes.gridItem} md={9} item>
@@ -427,6 +456,7 @@ function Chat(props) {
               loading={loading}
               handleSelectChat={(chat) => selectChat(chat)}
               handleDeleteChat={(chat) => deleteChat(chat)}
+              handleLeaveChat={handleLeaveChat}
             />
           </Grid>
         )}

@@ -170,11 +170,19 @@ export default function ChatMessages({
   };
 
   const unreadMessages = (chat) => {
-    if (chat !== undefined) {
-      const currentUser = chat.users.find((u) => u.userId === user.id);
-      return currentUser.unreads > 0;
-    }
-    return 0;
+    if (!chat || !Array.isArray(chat.users)) return 0;
+    const currentUser = chat.users.find((u) => {
+      try {
+        return (
+          u.userId === user.id ||
+          (u.user && u.user.id === user.id) ||
+          u.id === user.id
+        );
+      } catch (err) {
+        return false;
+      }
+    });
+    return currentUser && currentUser.unreads > 0;
   };
 
   useEffect(() => {

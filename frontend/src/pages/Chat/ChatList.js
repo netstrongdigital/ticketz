@@ -15,6 +15,7 @@ import { useDate } from "../../hooks/useDate";
 
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import ConfirmationModal from "../../components/ConfirmationModal";
 import api from "../../services/api";
@@ -48,6 +49,7 @@ export default function ChatList({
   handleSelectChat,
   handleDeleteChat,
   handleEditChat,
+  handleLeaveChat,
   pageInfo,
   loading,
 }) {
@@ -58,8 +60,25 @@ export default function ChatList({
 
   const [confirmationModal, setConfirmModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState({});
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [selectedChatToLeave, setSelectedChatToLeave] = useState({});
 
   const { id } = useParams();
+
+  const isParticipant = (chat) => {
+    if (!chat || !Array.isArray(chat.users)) return false;
+    return chat.users.some((u) => {
+      try {
+        return (
+          u.userId === user.id ||
+          (u.user && u.user.id === user.id) ||
+          u.id === user.id
+        );
+      } catch (err) {
+        return false;
+      }
+    });
+  };
 
   const goToMessages = async (chat) => {
     if (unreadMessages(chat) > 0) {
@@ -79,8 +98,19 @@ export default function ChatList({
   };
 
   const unreadMessages = (chat) => {
-    const currentUser = chat.users.find((u) => u.userId === user.id);
-    return currentUser.unreads;
+    if (!chat || !Array.isArray(chat.users)) return 0;
+    const currentUser = chat.users.find((u) => {
+      try {
+        return (
+          u.userId === user.id ||
+          (u.user && u.user.id === user.id) ||
+          u.id === user.id
+        );
+      } catch (err) {
+        return false;
+      }
+    });
+    return currentUser ? currentUser.unreads : 0;
   };
 
   const getPrimaryText = (chat) => {
@@ -141,39 +171,77 @@ export default function ChatList({
                     primary={getPrimaryText(chat)}
                     secondary={getSecondaryText(chat)}
                   />
-                  {chat.ownerId === user.id && (
+                  {
+                    /* Render actions: Leave visible to any participant (non-owner). Edit/Delete only for owner or admin. */
+                  }
+                  {(isParticipant(chat) && chat.ownerId !== user.id) ||
+                  chat.ownerId === user.id ||
+                  user.profile === "admin" ? (
                     <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={() => {
-                          goToMessages(chat).then(() => {
-                            handleEditChat(chat);
-                          });
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                        size="small"
-                        style={{ marginRight: 5 }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          setSelectedChat(chat);
-                          setConfirmModalOpen(true);
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      {/* Leave button: show for participants who are NOT the owner */}
+                      {isParticipant(chat) && chat.ownerId !== user.id && (
+                        <IconButton
+                          onClick={() => {
+                            setSelectedChatToLeave(chat);
+                            setLeaveModalOpen(true);
+                          }}
+                          edge="end"
+                          aria-label="leave"
+                          size="small"
+                          style={{ marginRight: 5 }}
+                        >
+                          {/* explicit exit icon for leaving the chat */}
+                          <ExitToAppIcon />
+                        </IconButton>
+                      )}
+
+                      {/* Edit/Delete: only for owner or admin */}
+                      {(chat.ownerId === user.id || user.profile === "admin") && (
+                        <>
+                          <IconButton
+                            onClick={() => {
+                              goToMessages(chat).then(() => {
+                                handleEditChat(chat);
+                              });
+                            }}
+                            edge="end"
+                            aria-label="edit"
+                            size="small"
+                            style={{ marginRight: 5 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedChat(chat);
+                              setConfirmModalOpen(true);
+                            }}
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
                     </ListItemSecondaryAction>
-                  )}
+                  ) : null}
                 </ListItem>
               ))}
           </List>
         </div>
       </div>
+      <ConfirmationModal
+        title={"Sair da Conversa"}
+        open={leaveModalOpen}
+        onClose={setLeaveModalOpen}
+        onConfirm={() => {
+          setLeaveModalOpen(false);
+          if (selectedChatToLeave && handleLeaveChat) handleLeaveChat(selectedChatToLeave);
+        }}
+      >
+        Você tem certeza que deseja sair desta conversa?
+      </ConfirmationModal>
     </>
   );
 }
