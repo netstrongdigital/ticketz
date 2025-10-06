@@ -35,77 +35,74 @@ Princípios desta estratégia
 - Implementar mudanças incrementais, testáveis e revertíveis.
 - Priorizar UX segura: mostrar controles apenas quando apropriado, e documentar riscos de segurança (backend não valida owner/admin para `PUT`/`DELETE`).
 
-Plano de ação (MVP frontend-first)
-----------------------------------
-Objetivo do MVP: permitir que qualquer participante saia do chat, e que admins possam visualizar/editar/deletar chats (UI), sem mudança inicial no DB.
+# ESTRATÉGIA (Atualizada) - Chat Interno (frontend-first)
 
-1) Implementar "Sair do Chat" (frontend only)
-- Local: `frontend/src/pages/Chat/ChatMessages.js` (toolbar/menu do chat) e possivelmente no modal de edição.
-- UI: botão "Sair do Chat" visível para participantes (quando `user.id` está em `currentChat.users`). Se o usuário for o `owner`, mostrar mensagem explicativa (owner não pode sair — ver item 4).
-- Fluxo:
-  1. O usuário confirma a ação em um diálogo.
-  2. Frontend constrói `usersPayload` a partir de `currentChat.users`, removendo o usuário atual. O formato já usado pelo frontend ao salvar edição é: `[ { id, name }, ... ]` (veja tráfego de rede observado).
-  3. Chamar `PUT /chats/:id` com `{ users: usersPayload, title: currentChat.title }`.
-  4. Em caso de sucesso: remover o chat da lista local (`setChats`) e redirecionar o usuário para `/chats`. Mostrar toast de confirmação.
-  5. O backend emitirá eventos via socket para os usuários restantes, mantendo a sincronização de UI.
-- Limitação: se user é `owner`: `UpdateService` re-incluirá o owner automaticamente; portanto bloqueamos a ação no cliente e oferecemos mensagem explicativa (owner não pode sair). Se depois decidir que owner pode sair, precisaremos de pequena mudança backend (permitir `ownerId` ser alterado e não re-adicionar automaticamente).
+Data: 2025-10-05
+Autor: Planejamento colaborativo
 
-2) Habilitar controles administrativos (frontend only)
-- Local: `frontend/src/pages/Chat/ChatList.js`, `ChatMessages.js`, modal de edição.
-- Regra UI: se `user.profile === 'admin'`, mostrar botões de Edit e Delete para cada chat (mesmo que o admin não esteja listado em `ChatUsers`). Já que o backend aceita `PUT` e `DELETE`, isso permite que o admin exerça essas ações hoje.
-- Observação de segurança: habilitar botões no frontend melhora UX, mas o backend continuará permitindo a ação para quem souber o endpoint — para reforçar segurança no futuro, adicionar validações no backend com `isAdmin` ou checagem de owner.
+Resumo rápido
+------------
+Estado atual: o fluxo frontend-first foi aplicado e testado no branch `netsapp-chat`.
 
-3) Admin: "Ver todos" (opcional mínima mudança backend)
-- Problema: `GET /chats` retorna apenas chats do usuário (ListService). Para admins visualizar *todos* os chats da empresa sem workarounds:
-  - Opção recomendada (pequena mudança backend): implementar `GET /chats?admin=true` protegido por middleware `isAdmin` que retorne todos chats da `companyId` com paginação.
-  - Alternativa sem backend: forçar a pesquisa por uuid manual (muito ruim). Recomendo a pequena rota backend se desejar a listagem completa.
-- UI: por padrão admins não veem chats onde não sejam participantes. Adicionar um toggle "Mostrar todos (admin)" que, quando ativo, usa `GET /chats?admin=true`. Não fazer subscribe automático aos sockets desses chats; apenas subscribe ao chat aberto.
+- Implementado: botão "Sair do Chat" para participantes (frontend).
+- Implementado: controles administrativos (Edit/Delete) visíveis para `user.profile === 'admin'` (frontend).
+- Testes manuais executados e validados (cenários básicos de saída, edição e deleção).
 
-4) Policy sobre owner e transferência
-- Proposta inicial (mínimo impacto): owner NÃO pode se auto-remover via fluxo "Sair". Owner só pode transferir propriedade ou o admin pode deletar/transferir. Transfer owner exige pequena alteração backend (permitir atualizar `ownerId`) — deixar para etapa seguinte, caso queira.
+Ponto pendente (único de alto impacto): "Admin ver todos" — ver seção "Próximo passo" abaixo.
 
-5) Notificações/subscribe
-- O frontend já subscribe via socket ao `company-{companyId}-chat-{chatId}` para o chat atual e `company-{companyId}-chat-user-{userId}` para receber notificações.
-- Para que admin não receba notificações automáticas de chats que não monitora, garantir que o cliente só subscribe ao canal do chat quando o admin abre o chat. Assim o admin só recebe notificações ao abrir/monitorar.
+Decisões estratégicas atualizadas
+--------------------------------
+- Trabalhar diretamente na branch `netsapp-chat` (não criaremos nova branch neste momento).
+- Evitar alterações de backend pesadas ou mudanças de esquema de banco por ora.
+- Não vamos implementar mudanças de segurança no backend neste ciclo (por decisão atual). O backend continuará permissivo para ações `PUT`/`DELETE`; aceitaremos esse trade-off temporariamente para manter agilidade.
 
-6) Testes manuais (cenários importantes)
-- Cenário A: usuário comum cria chat (owner), adiciona B e C. B clica "Sair". Verificar: B não vê mais o chat; A e C recebem atualização; B não recebe novas mensagens.
-- Cenário B: owner tenta sair. Verificar: UI bloqueia e explica que owner não pode sair (até transferir). Owner pode deletar o chat se desejar.
-- Cenário C: admin vê e edita/deleta chat que não contém o admin. Verificar: admin consegue editar (chamada PUT funciona) e DELETE funciona; verificar se eventos socket atualizam os participantes.
-- Cenário D: admin ativa "Mostrar todos" (se implementado) — ver lista completa, abrir chat para visualizar histórico; admin não recebe notificações a menos que abra o chat.
+O que já foi feito (status)
+--------------------------
+1) "Sair do Chat" — OK (implementado no frontend)
+   - Fluxo: confirmação via modal; frontend monta `usersPayload` sem o usuário e chama `PUT /chats/:id` ou `DELETE` quando não sobra participante.
+2) Controles de Admin — OK (implementado no frontend)
+   - Admins agora veem Edit/Delete mesmo que não sejam participantes.
+3) Admin ver todos — PENDENTE
+4) Policy owner — NÃO vamos implementar agora (owner não vê botão de sair; decisão intencional)
+5) Notificações para admin — já garantido pelo comportamento atual do frontend: admin não recebe notificações de chats que não abriu (subscribe somente ao chat aberto).
+6) Testes — OK (cenários manuais cobertos)
+7) Branching — NÃO vamos criar branch nova (trabalharemos em `netsapp-chat` como solicitado)
+8) Hardening de segurança do backend — NÃO será feito neste ciclo (decisão explícita)
 
-7) Rollout e feature flag
-- Desenvolver em branch: `feature/chat-leave-admin-controls`.
-- Envolver flag simples no frontend (const FEATURE_CHAT_LEAVE_ADMIN_CONTROLS = true/false) para ativar/desativar a UI em caso de rollback.
-- Testar em staging com usuários reais.
+Próximo passo (único e prioritário)
+---------------------------------
+Implementar a opção "Mostrar todos" para admins.
 
-8) Segurança e melhoria futura
-- Importante: o backend hoje aceita `PUT`/`DELETE` sem validar owner/admin — isto é um risco se alguém interceptar token ou usar curl. Em médio prazo, executar uma pequena revisão de segurança no backend:
-  - Garantir `DELETE /chats/:id` e `PUT /chats/:id` validem que o chamador é owner OU `isAdmin`.
-  - Implementar `GET /chats?admin=true` protegido por `isAdmin`.
+Requisitos mínimos e opções:
+- Backend: idealmente expor `GET /chats?admin=true` protegido por `isAdmin` para retornar todos os chats da company com paginação. Isso é a solução limpa.
+- Alternativa (se não quisermos tocar backend): criar uma solução de "workaround" (pesquisa por uuid etc.) — não recomendado.
 
-9) Checklist de implementação (MVP)
-- [ ] Criar branch `feature/chat-leave-admin-controls`.
-- [ ] Adicionar botão "Sair do Chat" em `ChatMessages.js` com fluxo `PUT /chats/:id` (remover user) e teste manual A.
-- [ ] Bloquear ação se `currentChat.ownerId === user.id` com mensagem explicativa.
-- [ ] Habilitar botões Edit/Delete no frontend quando `user.profile === 'admin'`.
-- [ ] Adicionar feature flag e documentação de QA (passos manuais listados acima).
-- [ ] (Opcional) Implementar `GET /chats?admin=true` com middleware `isAdmin`.
+UI proposta (frontend):
+- Mostrar um toggle/ícone para admins ao lado esquerdo do botão "Novo" na página de Chat (mesma linha). O comportamento segue o padrão da tela de Atendimentos (o mesmo visual do botão de mostrar/ocultar todos).
+- O ícone deve aparecer apenas para `user.profile === 'admin'`.
+- Ao ativar, o frontend fará a chamada `GET /chats?admin=true` (ou a rota que o backend exportar) e exibirá a lista completa.
+- Importante: não fazer subscribe automático aos sockets dos chats listados; o cliente só deve abrir/subscribe ao chat quando o admin clicar para abri-lo.
 
-10) Próximos passos que posso executar agora
-- Se você confirmar, eu implemento o patch frontend que:
-  - adiciona botão "Sair do Chat" com todo o fluxo descrito;
-  - habilita botões Edit/Delete para `user.profile === 'admin'`;
-  - adiciona a feature flag e um pequeno README de testes.
+Detalhes visuais e implementação sugerida:
+- Colocar o botão/toggle à esquerda do botão "Novo" (ou use o mesmo container), com `IconButton` Material-UI e o ícone consistente com Atendimentos (usar a mesma classe/estilo: `MuiIconButton-label` / `MuiSvgIcon-root` para manter padrão visual).
+- O toggle pode ser um simples `IconButton` com tooltip "Mostrar todos" (ativa/desativa).
 
--- Depois do deploy em staging e validação, podemos:
-  - decidir se será necessário endurecer backend (usar `isAdmin`/owner checks) e/ou implementar `GET /chats?admin=true`.
+Checklist mínimo para "Mostrar todos" (implantar rápido)
+- [ ] Backend: adicionar `GET /chats?admin=true` protegido por `isAdmin` (pequena mudança de controller) — ideal.
+- [ ] Frontend: adicionar ícone/toggle ao lado esquerdo do botão "Novo" (visível somente para admin) que, ao ativar, chama `GET /chats?admin=true` e atualiza a lista.
+- [ ] Frontend: garantir subscribe apenas ao chat aberto (não subscrever toda a lista automática).
+- [ ] Testes manuais: admin ativa/desativa, abre um chat da listagem completa e verifica histórico e que notificações só chegam ao abrir.
 
-Observações finais
-------------------
-- Mantive a abordagem de baixo impacto: nenhum campo será removido do banco e nenhuma migração inicial é necessária.
-- O caminho proposto resolve os problemas que você descreveu sem mudanças de banco e com mudança mínima no backend (opcional) para admin listagem.
+O que NÃO faremos neste ciclo
+----------------------------
+- Não vamos alterar o esquema do banco de dados.
+- Não vamos forçar validações de owner/admin no backend para `PUT /chats/:id` e `DELETE /chats/:id` (adiado).
+- Não vamos criar uma branch nova — trabalhamos na `netsapp-chat` conforme solicitado.
 
----
+Próximos passos que posso executar agora
+-------------------------------------
+1. Se você confirmar, eu implemento a UI do toggle (frontend) e preparo o pequeno patch backend `GET /chats?admin=true` opcional para você revisar. Podemos fazer o frontend primeiro e rodar com uma rota backend temporária se preferir testar rapidamente.
+2. Alternativamente, posso apenas implementar o frontend toggle que chama `GET /chats?admin=true` e deixar o backend para você autorizar quando quiser aplicar (eu preparo também o patch backend separado).
 
-Se desejar, inicio agora a implementação do patch frontend (vou criar branch e codificar). Confirme e eu começo: "Implementar frontend agora" ou diga se prefere primeiro a rota `GET /chats?admin=true` (mudar o backend mínima).
+Diga como prefere proceder para eu começar: implementar somente frontend (aguardando endpoint backend) ou implementar frontend+pequeno patch backend (`GET /chats?admin=true`) agora. Vou agir assim que confirmar.
+
