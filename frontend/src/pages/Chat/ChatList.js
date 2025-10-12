@@ -19,6 +19,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import ConfirmationModal from "../../components/ConfirmationModal";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -147,12 +148,12 @@ export default function ChatList({
   return (
     <>
       <ConfirmationModal
-        title={"Excluir Conversa"}
+        title={i18n.t("internalChat.list.confirmDelete.title", {defaultValue: "Delete Conversation"})}
         open={confirmationModal}
         onClose={setConfirmModalOpen}
         onConfirm={handleDelete}
       >
-        Esta ação não pode ser revertida, confirmar?
+        {i18n.t("internalChat.list.confirmDelete.message", {defaultValue: "This action cannot be undone, confirm?"})}
       </ConfirmationModal>
       <div className={classes.mainContainer}>
         <div className={classes.chatList}>
@@ -232,7 +233,7 @@ export default function ChatList({
         </div>
       </div>
       <ConfirmationModal
-        title={"Sair da Conversa"}
+        title={i18n.t("internalChat.list.confirmLeave.title", {defaultValue: "Leave Conversation"})}
         open={leaveModalOpen}
         onClose={setLeaveModalOpen}
         onConfirm={() => {
@@ -240,7 +241,7 @@ export default function ChatList({
           if (selectedChatToLeave && handleLeaveChat) handleLeaveChat(selectedChatToLeave);
         }}
       >
-        Você tem certeza que deseja sair desta conversa?
+        {i18n.t("internalChat.list.confirmLeave.message", {defaultValue: "Are you sure you want to leave this conversation?"})}
       </ConfirmationModal>
     </>
   );

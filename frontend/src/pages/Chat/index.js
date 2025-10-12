@@ -91,12 +91,12 @@ export function ChatModal({
   const handleSave = async () => {
     try {
       if (!title) {
-        alert("Por favor, preencha o título da conversa.");
+        alert(i18n.t("internalChat.modal.validation.titleRequired", {defaultValue: "Please fill in the conversation title."}));
         return;
       }
 
       if (!users || users.length === 0) {
-        alert("Por favor, selecione pelo menos um usuário.");
+        alert(i18n.t("internalChat.modal.validation.usersRequired", {defaultValue: "Please select at least one user."}));
         return;
       }
 
@@ -123,13 +123,13 @@ export function ChatModal({
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
-      <DialogTitle id="alert-dialog-title">Conversa</DialogTitle>
+      <DialogTitle id="alert-dialog-title">{i18n.t("internalChat.modal.title", {defaultValue: "Conversation"})}</DialogTitle>
       <DialogContent>
         <Grid spacing={2} container>
           <Grid xs={12} style={{ padding: 18 }} item>
             <TextField
-              label="Título"
-              placeholder="Título"
+              label={i18n.t("internalChat.modal.titleField.label", {defaultValue: "Title"})}
+              placeholder={i18n.t("internalChat.modal.titleField.placeholder", {defaultValue: "Title"})}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               variant="outlined"
@@ -148,10 +148,10 @@ export function ChatModal({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Fechar
+          {i18n.t("internalChat.modal.buttons.close", {defaultValue: "Close"})}
         </Button>
         <Button onClick={handleSave} color="primary" variant="contained">
-          Salvar
+          {i18n.t("internalChat.modal.buttons.save", {defaultValue: "Save"})}
         </Button>
       </DialogActions>
     </Dialog>
@@ -389,7 +389,7 @@ function Chat(props) {
                 color="primary"
                 variant="contained"
               >
-                Nova
+                {i18n.t("internalChat.modal.buttons.new", {defaultValue: "New"})}
               </Button>
             </div>
         
@@ -435,8 +435,8 @@ function Chat(props) {
             onChange={(e, v) => setTab(v)}
             aria-label="disabled tabs example"
           >
-            <Tab label="Chats" />
-            <Tab label="Mensagens" />
+            <Tab label={i18n.t("internalChat.tabs.chats", {defaultValue: "Chats"})} />
+            <Tab label={i18n.t("internalChat.tabs.messages", {defaultValue: "Messages"})} />
           </Tabs>
         </Grid>
         {tab === 0 && (
@@ -447,7 +447,7 @@ function Chat(props) {
                 color="primary"
                 variant="contained"
               >
-                Novo
+                {i18n.t("internalChat.modal.buttons.newMobile", {defaultValue: "New"})}
               </Button>
             </div>
             <ChatList

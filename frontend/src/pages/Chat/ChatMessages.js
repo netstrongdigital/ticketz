@@ -28,6 +28,7 @@ import MicIcon from "@material-ui/icons/Mic";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import RecordingTimer from "../../components/MessageInputCustom/RecordingTimer";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -246,7 +247,7 @@ export default function ChatMessages({
               target="_blank"
               href={message.mediaPath}
             >
-              Download
+              {i18n.t("internalChat.messages.download", {defaultValue: "Download"})}
             </Button>
           </div>
           {/* <Divider /> */}

@@ -162,6 +162,40 @@ const messages = {
       },
       internalChat: {
         title: "Internal Chat",
+        modal: {
+          title: "Conversation",
+          titleField: {
+            label: "Title",
+            placeholder: "Title"
+          },
+          validation: {
+            titleRequired: "Please fill in the conversation title.",
+            usersRequired: "Please select at least one user."
+          },
+          buttons: {
+            close: "Close",
+            save: "Save",
+            new: "New",
+            newMobile: "New"
+          }
+        },
+        list: {
+          confirmDelete: {
+            title: "Delete Conversation",
+            message: "This action cannot be undone, confirm?"
+          },
+          confirmLeave: {
+            title: "Leave Conversation",
+            message: "Are you sure you want to leave this conversation?"
+          }
+        },
+        tabs: {
+          chats: "Chats",
+          messages: "Messages"
+        },
+        messages: {
+          download: "Download"
+        }
       },
       whatsappModal: {
         title: {

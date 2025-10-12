@@ -165,8 +165,41 @@ const messages = {
         },
       },
       internalChat: {
-        title: "Chat Interno"
-
+        title: "Chat Interno",
+        modal: {
+          title: "Conversa",
+          titleField: {
+            label: "Título",
+            placeholder: "Título"
+          },
+          validation: {
+            titleRequired: "Por favor, preencha o título da conversa.",
+            usersRequired: "Por favor, selecione pelo menos um usuário."
+          },
+          buttons: {
+            close: "Fechar",
+            save: "Salvar",
+            new: "Nova",
+            newMobile: "Novo"
+          }
+        },
+        list: {
+          confirmDelete: {
+            title: "Excluir Conversa",
+            message: "Esta ação não pode ser revertida, confirmar?"
+          },
+          confirmLeave: {
+            title: "Sair da Conversa",
+            message: "Você tem certeza que deseja sair desta conversa?"
+          }
+        },
+        tabs: {
+          chats: "Chats",
+          messages: "Mensagens"
+        },
+        messages: {
+          download: "Download"
+        }
       },
       whatsappModal: {
         title: {

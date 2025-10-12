@@ -124,6 +124,40 @@ const messages = {
       },
       internalChat: {
         title: "Obrolan Internal",
+        modal: {
+          title: "Percakapan",
+          titleField: {
+            label: "Judul",
+            placeholder: "Judul"
+          },
+          validation: {
+            titleRequired: "Silakan isi judul percakapan.",
+            usersRequired: "Silakan pilih setidaknya satu pengguna."
+          },
+          buttons: {
+            close: "Tutup",
+            save: "Simpan",
+            new: "Baru",
+            newMobile: "Baru"
+          }
+        },
+        list: {
+          confirmDelete: {
+            title: "Hapus Percakapan",
+            message: "Tindakan ini tidak dapat dibatalkan, konfirmasi?"
+          },
+          confirmLeave: {
+            title: "Keluar dari Percakapan",
+            message: "Apakah Anda yakin ingin keluar dari percakapan ini?"
+          }
+        },
+        tabs: {
+          chats: "Obrolan",
+          messages: "Pesan"
+        },
+        messages: {
+          download: "Unduh"
+        }
       },
       whatsappModal: {
         title: {

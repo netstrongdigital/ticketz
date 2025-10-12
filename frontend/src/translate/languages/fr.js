@@ -123,6 +123,40 @@ const messages = {
       },
       internalChat: {
         title: "Chat Interne",
+        modal: {
+          title: "Conversation",
+          titleField: {
+            label: "Titre",
+            placeholder: "Titre"
+          },
+          validation: {
+            titleRequired: "Veuillez remplir le titre de la conversation.",
+            usersRequired: "Veuillez sélectionner au moins un utilisateur."
+          },
+          buttons: {
+            close: "Fermer",
+            save: "Enregistrer",
+            new: "Nouvelle",
+            newMobile: "Nouveau"
+          }
+        },
+        list: {
+          confirmDelete: {
+            title: "Supprimer la Conversation",
+            message: "Cette action ne peut pas être annulée, confirmer ?"
+          },
+          confirmLeave: {
+            title: "Quitter la Conversation",
+            message: "Êtes-vous sûr de vouloir quitter cette conversation ?"
+          }
+        },
+        tabs: {
+          chats: "Chats",
+          messages: "Messages"
+        },
+        messages: {
+          download: "Télécharger"
+        }
       },
       whatsappModal: {
         title: {

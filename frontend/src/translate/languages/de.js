@@ -122,6 +122,40 @@ const messages = {
       },
       internalChat: {
         title: "Interner Chat",
+        modal: {
+          title: "Unterhaltung",
+          titleField: {
+            label: "Titel",
+            placeholder: "Titel"
+          },
+          validation: {
+            titleRequired: "Bitte füllen Sie den Titel der Unterhaltung aus.",
+            usersRequired: "Bitte wählen Sie mindestens einen Benutzer aus."
+          },
+          buttons: {
+            close: "Schließen",
+            save: "Speichern",
+            new: "Neu",
+            newMobile: "Neu"
+          }
+        },
+        list: {
+          confirmDelete: {
+            title: "Unterhaltung löschen",
+            message: "Diese Aktion kann nicht rückgängig gemacht werden, bestätigen?"
+          },
+          confirmLeave: {
+            title: "Unterhaltung verlassen",
+            message: "Sind Sie sicher, dass Sie diese Unterhaltung verlassen möchten?"
+          }
+        },
+        tabs: {
+          chats: "Chats",
+          messages: "Nachrichten"
+        },
+        messages: {
+          download: "Download"
+        }
       },
       whatsappModal: {
         title: {
