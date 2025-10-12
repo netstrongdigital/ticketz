@@ -2,6 +2,16 @@
 
 Este documento registra a estratégia para transformar o `ToDoList` atual (que hoje é client-only e armazena tarefas no `localStorage` do navegador) em um recurso persistido no banco de dados, multi-usuário, com papéis e visões para Admin e usuário comum. Use este arquivo como fonte de verdade para decisões antes de qualquer alteração de código.
 
+## Decisão de implementação
+**IMPLEMENTAR DO ZERO** - Após análise do PR #382 (maio/2023), decidimos criar nossa própria implementação para controle total e alinhamento perfeito com nosros requisitos. O PR #382 será usado apenas como referência de boas práticas.
+
+### Aprendizados incorporados do PR #382
+- ✅ **Padrões de código**: Migration syntax `export default` + async/await
+- ✅ **Estrutura service/controller**: Interface + validation + business logic
+- ✅ **Autorização**: Lógica de filtro por perfil no service layer
+- ✅ **Associations**: Relacionamentos User/Company bem definidos
+- ✅ **Naming conventions**: Seguir padrões consistentes do projeto
+
 ## Objetivo
 - Migrar o ToDoList de localStorage para persistência no banco de dados central.
 - Permitir que Admins criem tarefas para outros usuários da mesma empresa (company scope).
